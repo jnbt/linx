@@ -6,7 +6,9 @@ defmodule Linx.ConnectionTest do
   test "sends a line using UDP" do
     {:ok, server} = :gen_udp.open(0, [:binary, active: false])
     {:ok, server_port} = :inet.port(server)
-    Connection.send("localhost", server_port, "Hello World")
+
+    {:ok, connection} = Connection.open("localhost", server_port)
+    :ok = Connection.send(connection, "Hello World")
 
     {:ok, {_, _, "Hello World"}} = :gen_udp.recv(server, 0)
   end
