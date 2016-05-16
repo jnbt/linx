@@ -1,17 +1,50 @@
 defmodule Linx.Encoder do
-  def encode(%{
+  def encode(%{} = data) do
+    do_encode(data)
+  end
+
+  defp do_encode(%{
     measurement: measurement,
     fields: fields,
     tags: tags,
     timestamp: timestamp
   }) do
-    encode_v(measurement)
+    ""
+    |> encode_measurement(measurement)
+    |> encode_tags(tags)
+    |> encode_fields(fields)
+    |> encode_timestamp(timestamp)
+  end 
+
+  defp do_encode(%{
+    measurement: measurement,
+    fields: fields
+  }) do
+    ""
+    |> encode_measurement(measurement)
+    |> encode_fields(fields)
+  end 
+
+  defp encode_measurement(line, measurement) do
+    line <> encode_v(measurement)
+  end
+
+  defp encode_tags(line, %{} = tags) do
+    line
     <> ","
     <> encode_kv(tags)
+  end
+
+  defp encode_fields(line, %{} = fields) do
+    line
     <> " "
     <> encode_kv(fields)
+  end
+
+  defp encode_timestamp(line, timestamp) when is_integer(timestamp) do
+    line
     <> " "
-    <> encode_timestamp(timestamp)
+    <> to_string(timestamp)
   end
 
   defp encode_kv(%{} = data) do
@@ -33,10 +66,6 @@ defmodule Linx.Encoder do
     "#{data}i"
   end
   defp encode_v(data) do
-    to_string(data)
-  end
-
-  defp encode_timestamp(data) when is_integer(data) do
     to_string(data)
   end
 end

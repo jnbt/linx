@@ -37,4 +37,14 @@ defmodule Linx.EncoderTest do
 
     assert Encoder.encode(data) == expected
   end
+
+  test "encodes minimum data" do
+    data = %{
+      measurement: "series",
+      fields: %{ "field" => 0.51 }
+    }
+    expected = ~S{series field=0.51}
+
+    assert Encoder.encode(data) == expected
+  end
 end
