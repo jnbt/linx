@@ -60,6 +60,28 @@ defmodule Linx.EncoderTest do
     assert Encoder.encode(data) == expected
   end
 
+  test "encodes with tags" do
+    data = %{
+      measurement: "series",
+      tags: %{ "foo" => "bar" },
+      fields: %{ "field" => 0.51 }
+    }
+    expected = ~S{series,foo=bar field=0.51}
+
+    assert Encoder.encode(data) == expected
+  end
+
+  test "encodes with timestamp" do
+    data = %{
+      measurement: "series",
+      fields: %{ "field" => 0.51 },
+      timestamp: 123_456_789
+    }
+    expected = ~S{series field=0.51 123456789}
+
+    assert Encoder.encode(data) == expected
+  end
+
   test "encodes for integer values" do
     data = %{
       measurement: "series",

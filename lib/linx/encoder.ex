@@ -1,34 +1,17 @@
 defmodule Linx.Encoder do
   def encode(%{} = data) do
-    do_encode(data)
-  end
-
-  defp do_encode(%{
-    measurement: measurement,
-    fields: fields,
-    tags: tags,
-    timestamp: timestamp
-  }) do
     ""
-    |> encode_measurement(measurement)
-    |> encode_tags(tags)
-    |> encode_fields(fields)
-    |> encode_timestamp(timestamp)
-  end 
-
-  defp do_encode(%{
-    measurement: measurement,
-    fields: fields
-  }) do
-    ""
-    |> encode_measurement(measurement)
-    |> encode_fields(fields)
+    |> encode_measurement(Map.fetch!(data, :measurement))
+    |> encode_tags(Map.get(data, :tags))
+    |> encode_fields(Map.fetch!(data, :fields))
+    |> encode_timestamp(Map.get(data, :timestamp))
   end 
 
   defp encode_measurement(line, measurement) do
     line <> encode_v(measurement)
   end
 
+  defp encode_tags(line, nil), do: line
   defp encode_tags(line, %{} = tags) do
     line
     <> ","
@@ -41,6 +24,7 @@ defmodule Linx.Encoder do
     <> encode_kv(fields)
   end
 
+  defp encode_timestamp(line, nil), do: line
   defp encode_timestamp(line, timestamp) when is_integer(timestamp) do
     line
     <> " "
