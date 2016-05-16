@@ -1,0 +1,2 @@
+defmodule Linx do
+end
