@@ -14,8 +14,7 @@ defmodule Linx.EncoderTest do
     assert Encoder.encode(data) == expected
   end
 
-  test "escapes whitespaces and special chars" do
-
+  test "escapes whitespaces" do
     data = %{
       measurement: "A test measurement",
       fields: %{ "some long field" => 5 },
@@ -23,6 +22,18 @@ defmodule Linx.EncoderTest do
       timestamp: 123_456_789
     }
     expected = ~S{A\ test\ measurement,some\ tag=with\ whitespace some\ long\ field=5i 123456789}
+
+    assert Encoder.encode(data) == expected
+  end
+
+  test "escapes commas" do
+    data = %{
+      measurement: "A,test,measurement",
+      fields: %{ "some,long,field" => 5 },
+      tags: %{ "some,tag" => "with,comma" },
+      timestamp: 123_456_789
+    }
+    expected = ~S{A\,test\,measurement,some\,tag=with\,comma some\,long\,field=5i 123456789}
 
     assert Encoder.encode(data) == expected
   end

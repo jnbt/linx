@@ -25,7 +25,9 @@ defmodule Linx.Encoder do
   end
 
   defp encode_v(data) when is_binary(data) do
-    String.replace(data, " ", ~S{\ })
+    data
+    |> String.replace(" ", ~S{\ })
+    |> String.replace(",", ~S{\,})
   end
   defp encode_v(data) when is_integer(data) do
     "#{data}i"
