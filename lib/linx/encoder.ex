@@ -61,6 +61,7 @@ defmodule Linx.Encoder do
     data
     |> String.replace(" ", ~S{\ })
     |> String.replace(",", ~S{\,})
+    |> String.replace("\"", ~S{\"})
   end
   defp encode_v(data) when is_integer(data) do
     "#{data}i"

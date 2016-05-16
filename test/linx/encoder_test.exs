@@ -17,11 +17,11 @@ defmodule Linx.EncoderTest do
   test "escapes whitespaces" do
     data = %{
       measurement: "A test measurement",
-      fields: %{ "some long field" => 5 },
+      fields: %{ "some long field" => 5.0 },
       tags: %{ "some tag" => "with whitespace" },
       timestamp: 123_456_789
     }
-    expected = ~S{A\ test\ measurement,some\ tag=with\ whitespace some\ long\ field=5i 123456789}
+    expected = ~S{A\ test\ measurement,some\ tag=with\ whitespace some\ long\ field=5.0 123456789}
 
     assert Encoder.encode(data) == expected
   end
@@ -29,11 +29,23 @@ defmodule Linx.EncoderTest do
   test "escapes commas" do
     data = %{
       measurement: "A,test,measurement",
-      fields: %{ "some,long,field" => 5 },
+      fields: %{ "some,long,field" => 5.0 },
       tags: %{ "some,tag" => "with,comma" },
       timestamp: 123_456_789
     }
-    expected = ~S{A\,test\,measurement,some\,tag=with\,comma some\,long\,field=5i 123456789}
+    expected = ~S{A\,test\,measurement,some\,tag=with\,comma some\,long\,field=5.0 123456789}
+
+    assert Encoder.encode(data) == expected
+  end
+
+  test "escapes quotes" do
+    data = %{
+      measurement: "A\"test\"measurement",
+      fields: %{ "some\"long\"field" => 5.0 },
+      tags: %{ "some\"tag" => "with\"comma" },
+      timestamp: 123_456_789
+    }
+    expected = ~S{A\"test\"measurement,some\"tag=with\"comma some\"long\"field=5.0 123456789}
 
     assert Encoder.encode(data) == expected
   end
@@ -44,6 +56,26 @@ defmodule Linx.EncoderTest do
       fields: %{ "field" => 0.51 }
     }
     expected = ~S{series field=0.51}
+
+    assert Encoder.encode(data) == expected
+  end
+
+  test "encodes for integer values" do
+    data = %{
+      measurement: "series",
+      fields: %{ "field" => 5 }
+    }
+    expected = ~S{series field=5i}
+
+    assert Encoder.encode(data) == expected
+  end
+
+  test "encodes for boolean values" do
+    data = %{
+      measurement: "series",
+      fields: %{ "one" => true, "two" => false}
+    }
+    expected = ~S{series one=true,two=false}
 
     assert Encoder.encode(data) == expected
   end
