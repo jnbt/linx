@@ -1,10 +1,38 @@
+defmodule Linx.Data do
+  defstruct measurement: nil, tags: nil, fields: nil, timestamp: nil  
+end
+
 defmodule Linx.Encoder do
+  alias Linx.Data
+
+  def encode(%Data{} = data) do
+    {:ok, do_encode(data)}
+  end
   def encode(%{} = data) do
+    {:ok, do_encode(struct(Data, data))}
+  end
+  def encode(_) do
+    {:error, "Cannot encode passed data. Pass Linx.Data or Map."}
+  end
+
+  def encode!(data) do
+    {:ok, line} = encode(data)
+    line
+  end
+
+  defp do_encode(%Data{
+    measurement: measurement,
+    tags: tags,
+    fields: fields,
+    timestamp: timestamp
+  }) 
+  when is_binary(measurement) and is_map(fields)
+  do
     ""
-    |> encode_measurement(Map.fetch!(data, :measurement))
-    |> encode_tags(Map.get(data, :tags))
-    |> encode_fields(Map.fetch!(data, :fields))
-    |> encode_timestamp(Map.get(data, :timestamp))
+    |> encode_measurement(measurement)
+    |> encode_tags(tags)
+    |> encode_fields(fields)
+    |> encode_timestamp(timestamp)
   end 
 
   defp encode_measurement(line, measurement) do

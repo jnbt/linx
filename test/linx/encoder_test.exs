@@ -1,7 +1,19 @@
 defmodule Linx.EncoderTest do
   use ExUnit.Case
-  alias Linx.Encoder
+  alias Linx.{Encoder,Data}
   doctest Linx.Encoder
+
+  test "does not support unknown data types" do
+    {:error, _} = Encoder.encode(nil)
+    {:error, _} = Encoder.encode(1)
+    {:error, _} = Encoder.encode("")
+    {:error, _} = Encoder.encode(<<1>>)
+    {:error, _} = Encoder.encode([])
+
+    assert_raise MatchError, fn -> 
+      Encoder.encode!(nil)
+    end
+  end
 
   test "encodes data" do
     data = %{
@@ -11,7 +23,7 @@ defmodule Linx.EncoderTest do
       timestamp: 123_456_789
     }
     expected = ~S{measurement,tag=foo field=1.23 123456789}
-    assert Encoder.encode(data) == expected
+    assert_encoded(data, expected)
   end
 
   test "escapes whitespaces" do
@@ -23,7 +35,7 @@ defmodule Linx.EncoderTest do
     }
     expected = ~S{A\ test\ measurement,some\ tag=with\ whitespace some\ long\ field=5.0 123456789}
 
-    assert Encoder.encode(data) == expected
+    assert_encoded(data, expected)
   end
 
   test "escapes commas" do
@@ -35,7 +47,7 @@ defmodule Linx.EncoderTest do
     }
     expected = ~S{A\,test\,measurement,some\,tag=with\,comma some\,long\,field=5.0 123456789}
 
-    assert Encoder.encode(data) == expected
+    assert_encoded(data, expected)
   end
 
   test "escapes quotes" do
@@ -47,7 +59,7 @@ defmodule Linx.EncoderTest do
     }
     expected = ~S{A\"test\"measurement,some\"tag=with\"comma some\"long\"field=5.0 123456789}
 
-    assert Encoder.encode(data) == expected
+    assert_encoded(data, expected)
   end
 
   test "encodes minimum data" do
@@ -57,7 +69,18 @@ defmodule Linx.EncoderTest do
     }
     expected = ~S{series field=0.51}
 
-    assert Encoder.encode(data) == expected
+    assert_encoded(data, expected)
+    assert expected == Encoder.encode!(data)
+  end
+
+  test "encodes from Data struct" do
+    data = %Data{
+      measurement: "series",
+      fields: %{ "field" => 0.51 }
+    }
+    expected = ~S{series field=0.51}
+
+    assert_encoded(data, expected)
   end
 
   test "encodes with tags" do
@@ -68,7 +91,7 @@ defmodule Linx.EncoderTest do
     }
     expected = ~S{series,foo=bar field=0.51}
 
-    assert Encoder.encode(data) == expected
+    assert_encoded(data, expected)
   end
 
   test "encodes with timestamp" do
@@ -79,7 +102,7 @@ defmodule Linx.EncoderTest do
     }
     expected = ~S{series field=0.51 123456789}
 
-    assert Encoder.encode(data) == expected
+    assert_encoded(data, expected)
   end
 
   test "encodes for integer values" do
@@ -89,7 +112,7 @@ defmodule Linx.EncoderTest do
     }
     expected = ~S{series field=5i}
 
-    assert Encoder.encode(data) == expected
+    assert_encoded(data, expected)
   end
 
   test "encodes for boolean values" do
@@ -99,6 +122,10 @@ defmodule Linx.EncoderTest do
     }
     expected = ~S{series one=true,two=false}
 
-    assert Encoder.encode(data) == expected
+    assert_encoded(data, expected)
+  end
+
+  defp assert_encoded(data, expected) do
+    assert {:ok, expected} == Encoder.encode(data)
   end
 end
