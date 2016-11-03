@@ -1,6 +1,6 @@
 defmodule Linx.ConnectionTest do
   use ExUnit.Case
-  alias Linx.{Connection}
+  alias Linx.Connection
   doctest Linx.Connection
 
   test "sends a line using UDP" do
